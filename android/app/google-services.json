@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "477421022483",
+    "project_id": "fleetop-inventory",
+    "storage_bucket": "fleetop-inventory.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:477421022483:android:328c7a6f12702e60a6fee6",
+        "android_client_info": {
+          "package_name": "com.example.inventory"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB1RC2Gd5hYS_jQMYib3F3xqE9k3sezD9I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:477421022483:android:02cb6b0a7e4b06eca6fee6",
+        "android_client_info": {
+          "package_name": "com.example.inventory.inventory"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB1RC2Gd5hYS_jQMYib3F3xqE9k3sezD9I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
