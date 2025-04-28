@@ -13,19 +13,20 @@ class _ProductViewPageState extends State<ProductViewPage> {
   String _selectedCategory = 'All';
 
   Stream<QuerySnapshot> _getFilteredProducts() {
-    Query query = FirebaseFirestore.instance.collection('products');
-
+    Query query = FirebaseFirestore.instance.collection('inventory');
     if (_selectedCategory != 'All') {
       query = query.where('category', isEqualTo: _selectedCategory);
     }
-
     return query.snapshots();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Product View")),
+      appBar: AppBar(
+        title: const Text("Inventory View"),
+        backgroundColor: Colors.blueGrey,
+      ),
       body: Column(
         children: [
           Padding(
@@ -37,6 +38,7 @@ class _ProductViewPageState extends State<ProductViewPage> {
                     decoration: const InputDecoration(
                       labelText: 'Search by name...',
                       border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.search),
                     ),
                     onChanged: (val) {
                       setState(() {
@@ -48,6 +50,8 @@ class _ProductViewPageState extends State<ProductViewPage> {
                 const SizedBox(width: 10),
                 DropdownButton<String>(
                   value: _selectedCategory,
+                  borderRadius: BorderRadius.circular(8),
+                  dropdownColor: Colors.white,
                   items: const [
                     DropdownMenuItem(value: 'All', child: Text('All')),
                     DropdownMenuItem(value: 'GPS', child: Text('GPS')),
@@ -82,17 +86,30 @@ class _ProductViewPageState extends State<ProductViewPage> {
                   itemCount: products.length,
                   itemBuilder: (context, index) {
                     final data = products[index].data() as Map<String, dynamic>;
+                    final productName = data['productName'] ?? 'Unnamed';
+                    final quantity = data['quantity'] ?? 0;
+                    final price = data['price']?.toString() ?? '0.00';
+                    final category = data['category'] ?? 'Unknown';
+
                     return Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      elevation: 4,
+                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: ListTile(
-                        title: Text(data['productName'] ?? ''),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("ID: ${data['productId'] ?? ''}"),
-                            Text("Category: ${data['category'] ?? ''}"),
-                            Text("Price: \$${data['price']?.toStringAsFixed(2) ?? '0.00'}"),
-                          ],
+                        leading: const Icon(Icons.inventory_2, color: Colors.blueGrey, size: 32),
+                        title: Text(
+                          productName,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Quantity: $quantity"),
+                              Text("Price: ₹$price"),
+                              Text("Category: $category"),
+                            ],
+                          ),
                         ),
                       ),
                     );

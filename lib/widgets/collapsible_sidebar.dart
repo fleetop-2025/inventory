@@ -5,6 +5,7 @@ class CollapsibleSidebar extends StatelessWidget {
   final Function(String) onItemSelected;
   final Function() onToggle;
   final String selectedItem;
+  final List<String> items; // ✅ Use List<String> instead of dynamic
 
   const CollapsibleSidebar({
     super.key,
@@ -12,20 +13,11 @@ class CollapsibleSidebar extends StatelessWidget {
     required this.onItemSelected,
     required this.onToggle,
     required this.selectedItem,
+    required this.items, // ✅ keep this
   });
 
   @override
   Widget build(BuildContext context) {
-    final items = [
-      'Dashboard',
-      'Products',
-      'Register Product',
-      'Approvals',
-      'Users',
-      'Register User',
-      'Notifications',
-    ];
-
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       width: isCollapsed ? 70 : 240,
@@ -103,6 +95,12 @@ class CollapsibleSidebar extends StatelessWidget {
         return Icons.person_add;
       case 'Notifications':
         return Icons.notifications;
+      case 'Inventory':
+        return Icons.inventory_2;
+      case 'Add Inventory':
+        return Icons.playlist_add;
+      case 'Request Installation':
+        return Icons.build;
       default:
         return Icons.help;
     }

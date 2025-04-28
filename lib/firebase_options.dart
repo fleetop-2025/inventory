@@ -73,4 +73,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'fleetop-inventory.firebasestorage.app',
     measurementId: 'G-YJV4MF0SF0',
   );
+
 }

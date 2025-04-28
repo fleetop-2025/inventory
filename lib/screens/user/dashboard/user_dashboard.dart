@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import '../add_inventory/add_inventory.dart';
 import '../request_installation/request_installation.dart';
 import '../view_inventory/view_inventory.dart';
-import '../../widgets/notifications_page.dart';
-import '../../widgets/collapsible_sidebar.dart';
-import '../../widgets/custom_appbar.dart'; // Custom AppBar with logout
+import 'package:inventory/widgets/notifications_page.dart';
+import 'package:inventory/widgets/collapsible_sidebar.dart';
+import 'package:inventory/widgets/custom_appbar.dart';
+
 
 class UserDashboard extends StatefulWidget {
   final VoidCallback onLogout;
@@ -53,8 +54,7 @@ class _UserDashboardState extends State<UserDashboard> {
             selectedItem: _selectedItem,
             onItemSelected: (item) => setState(() => _selectedItem = item),
             isCollapsed: _isCollapsed,
-            onToggleCollapse: () => setState(() => _isCollapsed = !_isCollapsed),
-            items: _menuItems,
+            onToggle: () => setState(() => _isCollapsed = !_isCollapsed), items: _menuItems,
           ),
           Expanded(
             child: AnimatedSwitcher(

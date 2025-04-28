@@ -45,6 +45,7 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
 
   void _handleLogout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
+    if (!context.mounted) return;
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const LoginScreen()),

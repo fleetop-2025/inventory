@@ -7,6 +7,8 @@ import 'package:inventory/widgets/notifications_page.dart';
 import '../product_registration.dart';
 import '../product_view.dart';
 import '../user_registration.dart';
+import 'package:inventory/widgets/custom_appbar.dart';
+
 
 class AdminDashboard extends StatefulWidget {
   final VoidCallback onLogout;
@@ -18,14 +20,24 @@ class AdminDashboard extends StatefulWidget {
 }
 
 class _AdminDashboardState extends State<AdminDashboard> {
-  String _selectedPage = 'Dashboard';
+  String _selectedItem = 'Dashboard';
   bool _isCollapsed = false;
+
+  final List<String> _menuItems = [
+    'Dashboard',
+    'Inventory',
+    'Register Product',
+    'Approvals',
+    'Users',
+    'Register User',
+    'Notifications',
+  ];
 
   Widget _getPage(String page) {
     switch (page) {
       case 'Dashboard':
         return const Center(child: Text('Admin Dashboard'));
-      case 'Products':
+      case 'Inventory':
         return const ProductViewPage();
       case 'Approvals':
         return const ApprovalPage();
@@ -45,36 +57,24 @@ class _AdminDashboardState extends State<AdminDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Admin Dashboard"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: widget.onLogout,
-            tooltip: 'Logout',
-          )
-        ],
+      appBar: CustomAppBar(
+        onLogout: widget.onLogout,
+        title: 'Admin Dashboard',
       ),
       body: Row(
         children: [
           CollapsibleSidebar(
+            selectedItem: _selectedItem,
+            onItemSelected: (item) => setState(() => _selectedItem = item),
             isCollapsed: _isCollapsed,
-            selectedItem: _selectedPage,
-            onItemSelected: (String page) {
-              setState(() {
-                _selectedPage = page;
-              });
-            },
-            onToggle: () {
-              setState(() {
-                _isCollapsed = !_isCollapsed;
-              });
-            },
+            onToggle: () => setState(() => _isCollapsed = !_isCollapsed),
+            items: _menuItems,
           ),
+
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: _getPage(_selectedPage),
+              child: _getPage(_selectedItem),
             ),
           ),
         ],

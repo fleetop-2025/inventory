@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-// Replace these with your actual dashboard screens
 import 'admin/dashboard/admin_dashboard.dart';
 import 'user/dashboard/user_dashboard.dart';
-
-
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -50,15 +47,29 @@ class _LoginScreenState extends State<LoginScreen> {
       print("Fetched role: $role");
       print("UID: ${user.uid}");
 
+      // Define logout function
+      VoidCallback logout = () async {
+        await FirebaseAuth.instance.signOut();
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+              (route) => false,
+        );
+      };
+
       if (role == 'Admin') {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const AdminDashboard()),
+          MaterialPageRoute(
+            builder: (_) => AdminDashboard(onLogout: logout),
+          ),
         );
       } else if (role == 'User') {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const UserDashboard()),
+          MaterialPageRoute(
+            builder: (_) => UserDashboard(onLogout: logout),
+          ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

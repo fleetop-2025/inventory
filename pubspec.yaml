@@ -34,6 +34,7 @@ dependencies:
   cloud_firestore: ^4.14.0
   firebase_auth: ^4.7.0  # Add this line for Firebase Authentication
   cupertino_icons: ^1.0.8
+  flutterfire_cli: ^1.2.0
 
 
 
