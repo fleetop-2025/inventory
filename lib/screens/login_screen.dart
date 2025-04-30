@@ -87,23 +87,106 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Login")),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
+      appBar: AppBar(
+        title: const Text("Login"),
+        backgroundColor: Color(0xFF222831),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Logo or app name (optional)
+                const Icon(
+                  Icons.account_circle,
+                  size: 100,
+                  color: Color(0xFF222831),
+                ),
+                const SizedBox(height: 20),
+
+                // Email field with custom decoration
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.white10,
+                        blurRadius: 5,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    controller: emailController,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      border: InputBorder.none,
+                      prefixIcon: Icon(Icons.email, color: Color(0xFF222831)),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Password field with custom decoration
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 5,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Password',
+                      border: InputBorder.none,
+                      prefixIcon: Icon(Icons.lock, color: Color(0xFF222831)),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Login button with styling
+                ElevatedButton(
+                  onPressed: signIn,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF222831), // Use backgroundColor instead of primary
+                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  child: const Text(
+                    "Login",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Forgot password link (optional)
+                TextButton(
+                  onPressed: () {
+                    // Handle Forgot Password (if needed)
+                  },
+                  child: const Text(
+                    'Forgot Password?',
+                    style: TextStyle(color: Color(0xFF222831)),
+                  ),
+                ),
+              ],
             ),
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Password'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(onPressed: signIn, child: const Text("Login")),
-          ],
+          ),
         ),
       ),
     );

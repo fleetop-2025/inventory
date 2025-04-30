@@ -35,11 +35,11 @@ dependencies:
   firebase_auth: ^4.7.0  # Add this line for Firebase Authentication
   cupertino_icons: ^1.0.8
   flutterfire_cli: ^1.2.0
-
-
-
-
-
+  fl_chart: ^0.63.0
+  csv: ^5.0.2
+  path_provider: ^2.1.1
+  permission_handler: ^11.3.1
+  share_plus: ^7.2.1
 
 dev_dependencies:
   flutter_test:
