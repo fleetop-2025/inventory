@@ -1,33 +1,41 @@
 {
   "project_info": {
-    "project_number": "477421022483",
-    "project_id": "fleetop-inventory",
-    "storage_bucket": "fleetop-inventory.firebasestorage.app"
+    "project_number": "690062728878",
+    "project_id": "inventory-d5c1e",
+    "storage_bucket": "inventory-d5c1e.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:477421022483:android:02cb6b0a7e4b06eca6fee6",
+        "mobilesdk_app_id": "1:690062728878:android:b3d97d848964a2b0aa973f",
         "android_client_info": {
-          "package_name": "com.example.inventory.inventory"
+          "package_name": "com.example.inventory"
         }
       },
       "oauth_client": [
         {
-          "client_id": "477421022483-0sf2da5gfua6ilfru8c8kc8o07aism4c.apps.googleusercontent.com",
+          "client_id": "690062728878-rmouk08ijv7n9n081mhi7qr9hlo85nkk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.inventory",
+            "certificate_hash": "14a2dbedaaffbdda5f6c1525a53749f5382cefa9"
+          }
+        },
+        {
+          "client_id": "690062728878-sg9mgt5n09bv74qvmucli3t03tos5kjm.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyB1RC2Gd5hYS_jQMYib3F3xqE9k3sezD9I"
+          "current_key": "AIzaSyCVLqozoCR9QUy5Bezl9V4RLDqAJM_0gEo"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "477421022483-0sf2da5gfua6ilfru8c8kc8o07aism4c.apps.googleusercontent.com",
+              "client_id": "690062728878-sg9mgt5n09bv74qvmucli3t03tos5kjm.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

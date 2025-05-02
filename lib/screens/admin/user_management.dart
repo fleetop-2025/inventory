@@ -16,6 +16,13 @@ class _UserManagementPageState extends State<UserManagementPage> {
         .update({'role': newRole.toLowerCase()});
   }
 
+  Future<void> updateUserStatus(String uid, String newStatus) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .update({'status': newStatus.toLowerCase()});
+  }
+
   Widget buildUserList() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance.collection('users').snapshots(),
@@ -31,34 +38,79 @@ class _UserManagementPageState extends State<UserManagementPage> {
         }
 
         return ListView.builder(
+          itemCount: users.length,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: users.length,
           itemBuilder: (context, index) {
             final user = users[index];
             final uid = user.id;
             final email = user['email'] ?? 'Unknown Email';
             final role = (user['role'] ?? 'user').toString().toLowerCase();
+            final status = (user['status'] ?? 'active').toString().toLowerCase();
 
             return Card(
-              margin: const EdgeInsets.symmetric(vertical: 5),
-              child: ListTile(
-                title: Text(email),
-                subtitle: Text('Role: ${role[0].toUpperCase()}${role.substring(1)}'),
-                trailing: DropdownButton<String>(
-                  value: role,
-                  items: const [
-                    DropdownMenuItem(value: 'user', child: Text('User')),
-                    DropdownMenuItem(value: 'admin', child: Text('Admin')),
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              elevation: 2,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // User Details
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(email, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 4),
+                          Text('Role: ${role[0].toUpperCase()}${role.substring(1)}'),
+                          Text('Status: ${status[0].toUpperCase()}${status.substring(1)}'),
+                        ],
+                      ),
+                    ),
+
+                    // Dropdowns
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          DropdownButton<String>(
+                            value: role,
+                            items: const [
+                              DropdownMenuItem(value: 'user', child: Text('User')),
+                              DropdownMenuItem(value: 'admin', child: Text('Admin')),
+                            ],
+                            onChanged: (value) {
+                              if (value != null && value != role) {
+                                updateUserRole(uid, value);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Role updated')),
+                                );
+                              }
+                            },
+                          ),
+                          DropdownButton<String>(
+                            value: status,
+                            items: const [
+                              DropdownMenuItem(value: 'active', child: Text('Active')),
+                              DropdownMenuItem(value: 'inactive', child: Text('Inactive')),
+                            ],
+                            onChanged: (value) {
+                              if (value != null && value != status) {
+                                updateUserStatus(uid, value);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Status updated')),
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
-                  onChanged: (value) {
-                    if (value != null && value != role) {
-                      updateUserRole(uid, value);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Role updated')),
-                      );
-                    }
-                  },
                 ),
               ),
             );
@@ -77,9 +129,9 @@ class _UserManagementPageState extends State<UserManagementPage> {
         children: [
           const Text(
             "All Users",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 16),
           buildUserList(),
         ],
       ),

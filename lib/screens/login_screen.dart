@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       User? user = userCredential.user;
       if (user != null) {
-        checkUserRole(user);
+        checkUserStatusAndRole(user);
       }
     } catch (e) {
       print('Login error: $e');
@@ -36,18 +36,22 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void checkUserRole(User user) async {
+  void checkUserStatusAndRole(User user) async {
     try {
       final doc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .get();
 
-      final role = doc.data()?['role'];
+      final data = doc.data();
+      final role = data?['role']?.toString().toLowerCase();
+      final status = data?['status']?.toString().toLowerCase();
+
       print("Fetched role: $role");
+      print("Fetched status: $status");
       print("UID: ${user.uid}");
 
-      // Define logout function
+      // Logout function
       VoidCallback logout = () async {
         await FirebaseAuth.instance.signOut();
         Navigator.pushAndRemoveUntil(
@@ -57,19 +61,25 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       };
 
-      if (role == 'Admin') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => AdminDashboard(onLogout: logout),
-          ),
+      // Check status
+      if (status != 'active') {
+        await FirebaseAuth.instance.signOut();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Your account is inactive. Contact Admin.')),
         );
-      } else if (role == 'User') {
+        return;
+      }
+
+      // Navigate based on role
+      if (role == 'admin') {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (_) => UserDashboard(onLogout: logout),
-          ),
+          MaterialPageRoute(builder: (_) => AdminDashboard(onLogout: logout)),
+        );
+      } else if (role == 'user') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => UserDashboard(onLogout: logout)),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -77,9 +87,9 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
-      print('Error fetching role: $e');
+      print('Error fetching user data: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error fetching user role')),
+        const SnackBar(content: Text('Error verifying user')),
       );
     }
   }
@@ -89,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Login"),
-        backgroundColor: Color(0xFF222831),
+        backgroundColor: const Color(0xFF222831),
       ),
       body: Center(
         child: Padding(
@@ -98,7 +108,6 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo or app name (optional)
                 const Icon(
                   Icons.account_circle,
                   size: 100,
@@ -106,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // Email field with custom decoration
+                // Email input
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12.0),
                   decoration: BoxDecoration(
@@ -131,7 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Password field with custom decoration
+                // Password input
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12.0),
                   decoration: BoxDecoration(
@@ -157,11 +166,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Login button with styling
+                // Login button
                 ElevatedButton(
                   onPressed: signIn,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF222831), // Use backgroundColor instead of primary
+                    backgroundColor: const Color(0xFF222831),
                     padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
@@ -174,10 +183,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // Forgot password link (optional)
+                // Forgot Password
                 TextButton(
                   onPressed: () {
-                    // Handle Forgot Password (if needed)
+                    // Optional Forgot Password handling
                   },
                   child: const Text(
                     'Forgot Password?',

@@ -13,6 +13,7 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   String _selectedRole = 'user';
+  String _selectedStatus = 'active';
   final _formKey = GlobalKey<FormState>();
 
   Future<void> registerUser() async {
@@ -27,6 +28,7 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
       await FirebaseFirestore.instance.collection('users').doc(uid).set({
         'email': _emailController.text.trim(),
         'role': _selectedRole,
+        'status': _selectedStatus,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -35,7 +37,10 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
 
       _emailController.clear();
       _passwordController.clear();
-      setState(() => _selectedRole = 'user');
+      setState(() {
+        _selectedRole = 'user';
+        _selectedStatus = 'active';
+      });
 
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -74,6 +79,16 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
                   DropdownMenuItem(value: 'admin', child: Text('Admin')),
                 ],
                 onChanged: (value) => setState(() => _selectedRole = value!),
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _selectedStatus,
+                decoration: const InputDecoration(labelText: "Status"),
+                items: const [
+                  DropdownMenuItem(value: 'active', child: Text('Active')),
+                  DropdownMenuItem(value: 'inactive', child: Text('Inactive')),
+                ],
+                onChanged: (value) => setState(() => _selectedStatus = value!),
               ),
               const SizedBox(height: 24),
               ElevatedButton(

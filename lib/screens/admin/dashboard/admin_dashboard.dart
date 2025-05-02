@@ -8,10 +8,6 @@ import 'package:csv/csv.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:inventory/widgets/download_csv.dart';
-import 'dart:io' show File;
-
-
-
 
 import 'package:inventory/widgets/collapsible_sidebar.dart';
 import '../user_management.dart';
@@ -87,23 +83,41 @@ class _AdminDashboardState extends State<AdminDashboard> {
     });
   }
 
-  Future<void> exportLogs(BuildContext context) async {
+  Future<void> pickDateAndExportLogs(BuildContext context) async {
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+    );
+
+    if (picked != null) {
+      await exportLogs(context, picked);
+    }
+  }
+
+  Future<void> exportLogs(BuildContext context, DateTimeRange dateRange) async {
     try {
       final snapshot = await FirebaseFirestore.instance
           .collection('TemporaryInstallation')
+          .where('timestamp', isGreaterThanOrEqualTo: dateRange.start)
+          .where('timestamp', isLessThanOrEqualTo: dateRange.end)
           .get();
 
       List<List<String>> rows = [
-        ['Product Name', 'Quantity', 'Requested By', 'Status'],
+        ['Product Name', 'Quantity', 'Requested By', 'Status', 'Date'],
       ];
 
       for (var doc in snapshot.docs) {
         final data = doc.data();
+        final timestamp = data['timestamp'] != null
+            ? (data['timestamp'] as Timestamp).toDate()
+            : null;
         rows.add([
           data['productName'] ?? '',
           '${data['quantity'] ?? ''}',
           data['requestedBy'] ?? '',
           data['status'] ?? '',
+          timestamp != null ? timestamp.toString() : '',
         ]);
       }
 
@@ -232,7 +246,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   ElevatedButton.icon(
-                    onPressed: () => exportLogs(context),
+                    onPressed: () => pickDateAndExportLogs(context),
                     icon: const Icon(Icons.download),
                     label: const Text('Export Report'),
                   ),

@@ -20,6 +20,9 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
   final TextEditingController _simController = TextEditingController();
   final TextEditingController _vehicleController = TextEditingController();
   final TextEditingController _companyController = TextEditingController();
+  final TextEditingController _ownerIdController = TextEditingController();
+
+  bool _keywordStatus = false;
 
   Future<void> _fetchInventoryItems() async {
     final snapshot = await FirebaseFirestore.instance.collection('inventory').get();
@@ -49,6 +52,7 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
     String sim = _simController.text.trim();
     String vehicle = _vehicleController.text.trim();
     String company = _companyController.text.trim();
+    String ownerId = _ownerIdController.text.trim();
 
     final selectedItem = _inventoryItems.firstWhere(
           (item) => item['productId'] == _selectedProductId,
@@ -64,6 +68,7 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
         sim.isNotEmpty &&
         vehicle.isNotEmpty &&
         company.isNotEmpty &&
+        ownerId.isNotEmpty &&
         uid != null) {
 
       await FirebaseFirestore.instance.collection('TemporaryInstallation').add({
@@ -79,6 +84,8 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
         'requestedBy': uid,
         'status': 'pending',
         'timestamp': FieldValue.serverTimestamp(),
+        'keyword_status': _keywordStatus,
+        'owner_id': ownerId,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -94,6 +101,8 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
         _simController.clear();
         _vehicleController.clear();
         _companyController.clear();
+        _ownerIdController.clear();
+        _keywordStatus = false;
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -168,6 +177,23 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
             TextField(
               controller: _companyController,
               decoration: const InputDecoration(labelText: "Company Name"),
+              keyboardType: TextInputType.text,
+            ),
+            const SizedBox(height: 10),
+            CheckboxListTile(
+              value: _keywordStatus,
+              onChanged: (val) {
+                setState(() {
+                  _keywordStatus = val ?? false;
+                });
+              },
+              title: const Text("Keyword Status"),
+              controlAffinity: ListTileControlAffinity.leading,
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _ownerIdController,
+              decoration: const InputDecoration(labelText: "Owner ID"),
               keyboardType: TextInputType.text,
             ),
             const SizedBox(height: 20),

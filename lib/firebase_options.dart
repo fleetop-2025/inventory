@@ -47,31 +47,31 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBzhSioZV0KQG0Wwe7W_bdfBZXHkwxU8GE',
-    appId: '1:477421022483:web:5a2ad2e70d30852da6fee6',
-    messagingSenderId: '477421022483',
-    projectId: 'fleetop-inventory',
-    authDomain: 'fleetop-inventory.firebaseapp.com',
-    storageBucket: 'fleetop-inventory.firebasestorage.app',
-    measurementId: 'G-0R5NVWW76B',
+    apiKey: 'AIzaSyCVLqozoCR9QUy5Bezl9V4RLDqAJM_0gEo',
+    appId: '1:690062728878:web:b5cdfc2d26888fb5aa973f',
+    messagingSenderId: '690062728878',
+    projectId: 'inventory-d5c1e',
+    authDomain: 'inventory-d5c1e.firebaseapp.com',
+    storageBucket: 'inventory-d5c1e.appspot.com',
+    measurementId: 'G-ZR0TXE7LD5',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyB1RC2Gd5hYS_jQMYib3F3xqE9k3sezD9I',
-    appId: '1:477421022483:android:02cb6b0a7e4b06eca6fee6',
-    messagingSenderId: '477421022483',
-    projectId: 'fleetop-inventory',
-    storageBucket: 'fleetop-inventory.firebasestorage.app',
+    apiKey: 'AIzaSyCVLqozoCR9QUy5Bezl9V4RLDqAJM_0gEo',
+    appId: '1:690062728878:android:b3d97d848964a2b0aa973f',
+    messagingSenderId: '690062728878',
+    projectId: 'inventory-d5c1e',
+    storageBucket: 'inventory-d5c1e.appspot.com',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyBzhSioZV0KQG0Wwe7W_bdfBZXHkwxU8GE',
-    appId: '1:477421022483:web:8c21c0fadcac3c30a6fee6',
-    messagingSenderId: '477421022483',
-    projectId: 'fleetop-inventory',
-    authDomain: 'fleetop-inventory.firebaseapp.com',
-    storageBucket: 'fleetop-inventory.firebasestorage.app',
-    measurementId: 'G-YJV4MF0SF0',
+    apiKey: 'AIzaSyCzFNCD3ke5gHn1AjSE55-oPc7N7Yl1yPY',
+    appId: '1:690062728878:web:b5cdfc2d26888fb5aa973f',
+    messagingSenderId: '690062728878',
+    projectId: 'inventory-d5c1e',
+    authDomain: 'inventory-d5c1e.firebaseapp.com',
+    storageBucket: 'inventory-d5c1e.appspot.com',
+    measurementId: 'G-ZR0TXE7LD5',
   );
 
 }
