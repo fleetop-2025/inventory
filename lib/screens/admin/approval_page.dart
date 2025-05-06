@@ -249,7 +249,9 @@ class _ApprovalPageState extends State<ApprovalPage> {
                 margin: const EdgeInsets.symmetric(vertical: 6),
                 child: ListTile(
                   title: Text(data['productName'] ?? 'Unknown Product'),
-                  subtitle: Text('Requested by: $requesterEmail\nQuantity: ${data['quantity'] ?? '-'}'),
+                  subtitle: Flexible(
+                    child: Text('Requested by: $requesterEmail', overflow: TextOverflow.ellipsis),
+                  ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
