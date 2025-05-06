@@ -51,7 +51,6 @@ class _LoginScreenState extends State<LoginScreen> {
       print("Fetched status: $status");
       print("UID: ${user.uid}");
 
-      // Logout function
       VoidCallback logout = () async {
         await FirebaseAuth.instance.signOut();
         Navigator.pushAndRemoveUntil(
@@ -61,7 +60,6 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       };
 
-      // Check status
       if (status != 'active') {
         await FirebaseAuth.instance.signOut();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -70,7 +68,6 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      // Navigate based on role
       if (role == 'admin') {
         Navigator.pushReplacement(
           context,
@@ -98,8 +95,9 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Login"),
+        title: const Text("Login", style: TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF222831),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Center(
         child: Padding(
@@ -108,10 +106,10 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.account_circle,
-                  size: 100,
-                  color: Color(0xFF222831),
+                Image.asset(
+                  'assets/fleetop.jpg',
+                  height: 100,
+                  width: 200,
                 ),
                 const SizedBox(height: 20),
 
