@@ -45,12 +45,20 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_icons:
+    android: true
+    image_path: "assets/icon/fleetopbg.jpg"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
+  assets:
+    - assets/icon/fleetopbg.jpg
+    - assets/fleetop.jpg
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
