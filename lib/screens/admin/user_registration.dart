@@ -12,23 +12,26 @@ class UserRegistrationPage extends StatefulWidget {
 class _UserRegistrationPageState extends State<UserRegistrationPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  String _selectedRole = 'user';
+  String _selectedRole = 'User'; // ✅ Capitalized to match dropdown item
   String _selectedStatus = 'active';
   final _formKey = GlobalKey<FormState>();
 
   Future<void> registerUser() async {
     try {
-      final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
+      final email = _emailController.text.trim();
+      final password = _passwordController.text.trim();
+
+      final userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
 
       final uid = userCredential.user!.uid;
 
       await FirebaseFirestore.instance.collection('users').doc(uid).set({
-        'email': _emailController.text.trim(),
+        'email': email,
+        'password': password, // ⚠️ Plaintext storage — only for internal/testing use
         'role': _selectedRole,
         'status': _selectedStatus,
+        'createdAt': FieldValue.serverTimestamp(),
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -38,10 +41,9 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
       _emailController.clear();
       _passwordController.clear();
       setState(() {
-        _selectedRole = 'user';
+        _selectedRole = 'User'; // ✅ Reset with proper case
         _selectedStatus = 'active';
       });
-
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Registration failed: $e')),
@@ -53,7 +55,7 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("User Registration")),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
@@ -62,21 +64,36 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
               TextFormField(
                 controller: _emailController,
                 decoration: const InputDecoration(labelText: "Email"),
-                validator: (value) => value!.isEmpty ? 'Enter email' : null,
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Enter email';
+                  }
+                  if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value.trim())) {
+                    return 'Enter a valid email';
+                  }
+                  return null;
+                },
               ),
+              const SizedBox(height: 12),
               TextFormField(
                 controller: _passwordController,
                 decoration: const InputDecoration(labelText: "Password"),
                 obscureText: true,
-                validator: (value) => value!.length < 6 ? 'Minimum 6 characters' : null,
+                validator: (value) {
+                  if (value == null || value.trim().length < 6) {
+                    return 'Minimum 6 characters required';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _selectedRole,
                 decoration: const InputDecoration(labelText: "Role"),
                 items: const [
-                  DropdownMenuItem(value: 'user', child: Text('User')),
-                  DropdownMenuItem(value: 'admin', child: Text('Admin')),
+                  DropdownMenuItem(value: 'User', child: Text('User')),
+                  DropdownMenuItem(value: 'Admin', child: Text('Admin')),
                 ],
                 onChanged: (value) => setState(() => _selectedRole = value!),
               ),
