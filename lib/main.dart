@@ -12,14 +12,21 @@ import 'screens/login_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (Firebase.apps.isEmpty) {
+  try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+  } catch (e) {
+    if (e.toString().contains('A Firebase App named "[DEFAULT]" already exists')) {
+      // Ignore this error - safe to proceed
+    } else {
+      rethrow;
+    }
   }
 
   runApp(const MyApp());
 }
+
 
 
 class MyApp extends StatelessWidget {
