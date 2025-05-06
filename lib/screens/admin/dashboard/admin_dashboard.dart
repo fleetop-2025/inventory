@@ -8,7 +8,7 @@ import 'package:csv/csv.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:inventory/widgets/download_csv.dart';
-
+import 'package:inventory/widgets/footer.dart';
 import 'package:inventory/widgets/collapsible_sidebar.dart';
 import '../user_management.dart';
 import '../approval_page.dart';
@@ -17,6 +17,7 @@ import '../product_registration.dart';
 import '../product_view.dart';
 import '../user_registration.dart';
 import 'package:inventory/widgets/custom_appbar.dart';
+import '../../../constants/version.dart';
 
 class AdminDashboard extends StatefulWidget {
   final VoidCallback onLogout;
@@ -124,7 +125,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       final csvContent = const ListToCsvConverter().convert(rows);
 
       if (kIsWeb) {
-        downloadCSV(rows, 'admin_report.csv'); // Web download
+        downloadCSV(rows, 'admin_report.csv');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('CSV download started')),
         );
@@ -242,6 +243,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
           onRefresh: fetchDashboardData,
           child: ListView(
             children: [
+              const SizedBox(height: 10),
+              Center(
+                child: Text(
+                  'FleeTop Technologies • Version: $appVersion',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF222831),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -292,9 +304,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
             items: _menuItems,
           ),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: _getPage(_selectedItem),
+            child: Column(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: _getPage(_selectedItem),
+                  ),
+                ),
+                const AppFooter(), // Footer is placed correctly here
+              ],
             ),
           ),
         ],

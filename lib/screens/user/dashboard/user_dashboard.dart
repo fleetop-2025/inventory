@@ -8,9 +8,8 @@ import 'package:csv/csv.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
-// Correct conditional import
 import 'package:inventory/widgets/download_csv.dart';
-
+import 'package:inventory/widgets/footer.dart';
 import '../add_inventory/add_inventory.dart';
 import '../request_installation/request_installation.dart';
 import '../view_inventory/view_inventory.dart';
@@ -18,6 +17,7 @@ import '../received_products/received_products.dart';
 import 'package:inventory/widgets/notifications_page.dart';
 import 'package:inventory/widgets/collapsible_sidebar.dart';
 import 'package:inventory/widgets/custom_appbar.dart';
+import '../../../constants/version.dart';
 
 class UserDashboard extends StatefulWidget {
   final VoidCallback onLogout;
@@ -187,7 +187,6 @@ class _UserDashboardState extends State<UserDashboard> {
   }
 
   Widget buildPieChart(Map<String, int> data, String title) {
-    final total = data.values.fold(0, (a, b) => a + b);
     final sections = data.entries.map((entry) {
       return PieChartSectionData(
         title: '${entry.key} (${entry.value})',
@@ -223,6 +222,17 @@ class _UserDashboardState extends State<UserDashboard> {
           onRefresh: fetchDashboardData,
           child: ListView(
             children: [
+              const SizedBox(height: 10),
+              Center(
+                child: Text(
+                  'FleeTop Technologies • Version: $appVersion',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF222831),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -267,9 +277,17 @@ class _UserDashboardState extends State<UserDashboard> {
             items: _menuItems,
           ),
           Expanded(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: _getPage(_selectedItem),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: _getPage(_selectedItem),
+                  ),
+                ),
+                const AppFooter(),
+              ],
             ),
           ),
         ],
