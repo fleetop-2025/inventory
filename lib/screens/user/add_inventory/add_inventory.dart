@@ -12,11 +12,11 @@ class AddInventoryPage extends StatefulWidget {
 class _AddInventoryPageState extends State<AddInventoryPage> {
   String? _selectedProductId;
   Map<String, dynamic>? _selectedProductData;
-  final TextEditingController _totalQuantityController = TextEditingController();
-  final TextEditingController _workingQuantityController = TextEditingController();
-  final TextEditingController _faultyQuantityController = TextEditingController();
-
+  final TextEditingController _quantityController = TextEditingController();
   List<Map<String, dynamic>> _productList = [];
+
+  bool _isWorking = false;
+  bool _isFaulty = false;
 
   Future<void> _fetchProducts() async {
     final snapshot = await FirebaseFirestore.instance.collection('products').get();
@@ -34,71 +34,51 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
     final uid = currentUser?.uid;
 
     if (_selectedProductData != null &&
-        _totalQuantityController.text.trim().isNotEmpty &&
-        _workingQuantityController.text.trim().isNotEmpty &&
-        _faultyQuantityController.text.trim().isNotEmpty &&
-        uid != null) {
+        _quantityController.text.trim().isNotEmpty &&
+        uid != null &&
+        (_isWorking ^ _isFaulty)) {
+      // Only one checkbox must be selected
 
-      final totalQuantity = int.tryParse(_totalQuantityController.text.trim());
-      final workingQuantity = int.tryParse(_workingQuantityController.text.trim());
-      final faultyQuantity = int.tryParse(_faultyQuantityController.text.trim());
+      final quantity = int.tryParse(_quantityController.text.trim());
 
-      if (totalQuantity == null || workingQuantity == null || faultyQuantity == null) {
+      if (quantity == null || quantity <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please enter valid numeric quantities")),
+          const SnackBar(content: Text("Please enter a valid quantity")),
         );
         return;
       }
 
-      if ((workingQuantity + faultyQuantity) != totalQuantity) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Working + Faulty must equal Total Quantity")),
-        );
-        return;
-      }
+      final data = {
+        'productName': _selectedProductData!['productName'],
+        'productId': _selectedProductData!['productId'],
+        'category': _selectedProductData!['category'],
+        'price': _selectedProductData!['price'],
+        'quantity': quantity,
+        'requestedBy': uid,
+        'status': 'pending',
+        'timestamp': FieldValue.serverTimestamp(),
+      };
 
-      // If workingQuantity > 0, create request in TemporaryInventoryAdd
-      if (workingQuantity > 0) {
-        await FirebaseFirestore.instance.collection('TemporaryInventoryAdd').add({
-          'productName': _selectedProductData!['productName'],
-          'productId': _selectedProductData!['productId'],
-          'category': _selectedProductData!['category'],
-          'price': _selectedProductData!['price'],
-          'quantity': workingQuantity,
-          'requestedBy': uid,
-          'status': 'pending',
-          'timestamp': FieldValue.serverTimestamp(),
-        });
-      }
-
-      // If faultyQuantity > 0, create request in TemporaryInTransitOut
-      if (faultyQuantity > 0) {
-        await FirebaseFirestore.instance.collection('TemporaryInTransitOut').add({
-          'productName': _selectedProductData!['productName'],
-          'productId': _selectedProductData!['productId'],
-          'category': _selectedProductData!['category'],
-          'price': _selectedProductData!['price'],
-          'quantity': faultyQuantity,
-          'requestedBy': uid,
-          'status': 'pending',
-          'timestamp': FieldValue.serverTimestamp(),
-        });
+      if (_isWorking) {
+        await FirebaseFirestore.instance.collection('TemporaryInventoryAdd').add(data);
+      } else if (_isFaulty) {
+        await FirebaseFirestore.instance.collection('TemporaryInTransitOut').add(data);
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Request(s) submitted for admin approval")),
+        const SnackBar(content: Text("Request submitted for admin approval")),
       );
 
       setState(() {
         _selectedProductId = null;
         _selectedProductData = null;
-        _totalQuantityController.clear();
-        _workingQuantityController.clear();
-        _faultyQuantityController.clear();
+        _quantityController.clear();
+        _isWorking = false;
+        _isFaulty = false;
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please complete all fields")),
+        const SnackBar(content: Text("Please complete all fields and select exactly one condition")),
       );
     }
   }
@@ -143,21 +123,30 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
             ),
             const SizedBox(height: 10),
             TextField(
-              controller: _totalQuantityController,
-              decoration: const InputDecoration(labelText: "Total Quantity"),
+              controller: _quantityController,
+              decoration: const InputDecoration(labelText: "Quantity"),
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 10),
-            TextField(
-              controller: _workingQuantityController,
-              decoration: const InputDecoration(labelText: "Working Quantity"),
-              keyboardType: TextInputType.number,
+            CheckboxListTile(
+              title: const Text("Working"),
+              value: _isWorking,
+              onChanged: (value) {
+                setState(() {
+                  _isWorking = value!;
+                  if (_isWorking) _isFaulty = false;
+                });
+              },
             ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _faultyQuantityController,
-              decoration: const InputDecoration(labelText: "Faulty Quantity"),
-              keyboardType: TextInputType.number,
+            CheckboxListTile(
+              title: const Text("Faulty"),
+              value: _isFaulty,
+              onChanged: (value) {
+                setState(() {
+                  _isFaulty = value!;
+                  if (_isFaulty) _isWorking = false;
+                });
+              },
             ),
             const SizedBox(height: 20),
             ElevatedButton(
