@@ -37,8 +37,6 @@ dependencies:
   flutterfire_cli: ^1.2.0
   fl_chart: ^0.63.0
   csv: ^5.0.2
-  path_provider: ^2.1.1
-  permission_handler: ^11.3.1
   share_plus: ^7.2.1
 
 dev_dependencies:
@@ -49,7 +47,7 @@ dev_dependencies:
 
 flutter_icons:
     android: true
-    image_path: "assets/icon/fleetopbg.jpg"
+    image_path: "assets/icon/fleetop-removebg-preview.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -59,6 +57,7 @@ flutter:
   assets:
     - assets/icon/fleetopbg.jpg
     - assets/fleetop.jpg
+    - assets/fleetop-removebg-preview.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

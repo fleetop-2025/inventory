@@ -192,7 +192,15 @@ class _UserDashboardState extends State<UserDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(onLogout: widget.onLogout, title: 'User Dashboard'),
+      appBar: CustomAppBar(
+        onLogout: widget.onLogout,
+        title: 'User Dashboard',
+        centerWidget: Image.asset(
+          'assets/fleetop-removebg-preview.png',
+          height: 40,
+        ),
+      ),
+
       body: Row(
         children: [
           CollapsibleSidebar(

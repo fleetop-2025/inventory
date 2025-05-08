@@ -202,7 +202,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       case 'Notifications':
         return const NotificationsPage();
       case 'Reports':
-        return  ReportPage();
+        return ReportPage();
       default:
         return const Center(child: Text("Page not found"));
     }
@@ -212,8 +212,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        onLogout: widget.onLogout,
         title: 'Admin Dashboard',
+        onLogout: widget.onLogout,
+        centerWidget: Image.asset(
+          'assets/fleetop-removebg-preview.png',
+          height: 40,
+        ),
       ),
       body: Row(
         children: [

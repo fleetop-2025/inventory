@@ -1,2 +1,2 @@
 // constants/version.dart
-const String appVersion = 'v1.0.0';
+const String appVersion = 'v1.0.1';

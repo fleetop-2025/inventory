@@ -21,6 +21,9 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
   final TextEditingController _vehicleController = TextEditingController();
   final TextEditingController _companyController = TextEditingController();
   final TextEditingController _ownerIdController = TextEditingController();
+  final TextEditingController _installedByController = TextEditingController();
+  final TextEditingController _referredByController = TextEditingController();
+  String? _paymentStatus;
 
   bool _keywordStatus = false;
 
@@ -53,6 +56,9 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
     String vehicle = _vehicleController.text.trim();
     String company = _companyController.text.trim();
     String ownerId = _ownerIdController.text.trim();
+    String installedBy = _installedByController.text.trim();
+    String referredBy = _referredByController.text.trim();
+    String? paymentStatus = _paymentStatus;
 
     final selectedItem = _inventoryItems.firstWhere(
           (item) => item['productId'] == _selectedProductId,
@@ -69,8 +75,10 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
         vehicle.isNotEmpty &&
         company.isNotEmpty &&
         ownerId.isNotEmpty &&
+        installedBy.isNotEmpty &&
+        referredBy.isNotEmpty &&
+        paymentStatus != null &&
         uid != null) {
-
       await FirebaseFirestore.instance.collection('TemporaryInstallation').add({
         'productName': selectedItem['productName'],
         'productId': selectedItem['productId'],
@@ -86,6 +94,9 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
         'timestamp': FieldValue.serverTimestamp(),
         'keyword_status': _keywordStatus,
         'owner_id': ownerId,
+        'installed_by': installedBy,
+        'payment_status': paymentStatus,
+        'referred_by': referredBy,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -102,6 +113,9 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
         _vehicleController.clear();
         _companyController.clear();
         _ownerIdController.clear();
+        _installedByController.clear();
+        _referredByController.clear();
+        _paymentStatus = null;
         _keywordStatus = false;
       });
     } else {
@@ -165,19 +179,21 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
             TextField(
               controller: _simController,
               decoration: const InputDecoration(labelText: "SIM Number"),
-              keyboardType: TextInputType.text,
             ),
             const SizedBox(height: 10),
             TextField(
               controller: _vehicleController,
               decoration: const InputDecoration(labelText: "Vehicle Number"),
-              keyboardType: TextInputType.text,
             ),
             const SizedBox(height: 10),
             TextField(
               controller: _companyController,
               decoration: const InputDecoration(labelText: "Company Name"),
-              keyboardType: TextInputType.text,
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _ownerIdController,
+              decoration: const InputDecoration(labelText: "Owner ID"),
             ),
             const SizedBox(height: 10),
             CheckboxListTile(
@@ -192,9 +208,27 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
             ),
             const SizedBox(height: 10),
             TextField(
-              controller: _ownerIdController,
-              decoration: const InputDecoration(labelText: "Owner ID"),
-              keyboardType: TextInputType.text,
+              controller: _installedByController,
+              decoration: const InputDecoration(labelText: "Installed By"),
+            ),
+            const SizedBox(height: 10),
+            DropdownButtonFormField<String>(
+              value: _paymentStatus,
+              items: const [
+                DropdownMenuItem(value: 'paid', child: Text("Paid")),
+                DropdownMenuItem(value: 'unpaid', child: Text("Unpaid")),
+              ],
+              onChanged: (val) {
+                setState(() {
+                  _paymentStatus = val;
+                });
+              },
+              decoration: const InputDecoration(labelText: "Payment Status"),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _referredByController,
+              decoration: const InputDecoration(labelText: "Referred By"),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
