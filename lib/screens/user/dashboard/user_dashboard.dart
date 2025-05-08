@@ -1,14 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
-import 'package:csv/csv.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-
-import 'package:inventory/widgets/download_csv.dart';
 import 'package:inventory/widgets/footer.dart';
 import '../add_inventory/add_inventory.dart';
 import '../request_installation/request_installation.dart';
@@ -80,63 +72,6 @@ class _UserDashboardState extends State<UserDashboard> {
       userRoles = roles;
       requestStats = requests;
     });
-  }
-
-  Future<void> exportLogs(BuildContext context) async {
-    try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('TemporaryInstallation')
-          .get();
-
-      List<List<String>> rows = [
-        ['Product Name', 'Quantity', 'Requested By', 'Status'],
-      ];
-
-      for (var doc in snapshot.docs) {
-        final data = doc.data();
-        rows.add([
-          data['productName'] ?? '',
-          '${data['quantity'] ?? ''}',
-          data['requestedBy'] ?? '',
-          data['status'] ?? '',
-        ]);
-      }
-
-      final csvContent = const ListToCsvConverter().convert(rows);
-
-      if (kIsWeb) {
-        downloadCSV(rows, 'user_report.csv');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('CSV download started')),
-        );
-      } else {
-        final status = await Permission.storage.request();
-        if (!status.isGranted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Storage permission denied')),
-          );
-          return;
-        }
-
-        final directory = await getTemporaryDirectory();
-        final filePath = '${directory.path}/user_report.csv';
-        final file = File(filePath);
-        await file.writeAsString(csvContent);
-
-        await Share.shareXFiles(
-          [XFile(filePath)],
-          text: 'User Report CSV attached',
-        );
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sharing CSV file...')),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to export report: $e')),
-      );
-    }
   }
 
   Widget buildBarChart(Map<String, int> data, String title) {
@@ -233,15 +168,6 @@ class _UserDashboardState extends State<UserDashboard> {
                 ),
               ),
               const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  ElevatedButton(
-                    onPressed: () => exportLogs(context),
-                    child: const Text('Download CSV'),
-                  ),
-                ],
-              ),
               if (inventorySummary.isNotEmpty) buildBarChart(inventorySummary, 'Inventory Quantities'),
               if (userRoles.isNotEmpty) buildPieChart(userRoles, 'User Role Distribution'),
               if (requestStats.isNotEmpty) buildBarChart(requestStats, 'Request Status Summary'),
