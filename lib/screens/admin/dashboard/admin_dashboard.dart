@@ -1,13 +1,8 @@
+// admin_dashboard.dart
+
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
-import 'package:csv/csv.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:inventory/widgets/download_csv.dart';
 import 'package:inventory/widgets/footer.dart';
 import 'package:inventory/widgets/collapsible_sidebar.dart';
 import '../user_management.dart';
@@ -18,6 +13,15 @@ import '../product_view.dart';
 import '../user_registration.dart';
 import 'package:inventory/widgets/custom_appbar.dart';
 import '../../../constants/version.dart';
+import '../report_page.dart';
+
+const List<String> availableCollections = [
+  'TemporaryInventoryAdd',
+  'Installation',
+  'InventoryInTransitOut',
+  'inventory',
+  'TemporaryInstallation',
+];
 
 class AdminDashboard extends StatefulWidget {
   final VoidCallback onLogout;
@@ -40,6 +44,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     'Users',
     'Register User',
     'Notifications',
+    'Reports',
   ];
 
   Map<String, int> inventorySummary = {};
@@ -82,81 +87,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
       userRoles = roles;
       requestStats = requests;
     });
-  }
-
-  Future<void> pickDateAndExportLogs(BuildContext context) async {
-    final picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-    );
-
-    if (picked != null) {
-      await exportLogs(context, picked);
-    }
-  }
-
-  Future<void> exportLogs(BuildContext context, DateTimeRange dateRange) async {
-    try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('TemporaryInstallation')
-          .where('timestamp', isGreaterThanOrEqualTo: dateRange.start)
-          .where('timestamp', isLessThanOrEqualTo: dateRange.end)
-          .get();
-
-      List<List<String>> rows = [
-        ['Product Name', 'Quantity', 'Requested By', 'Status', 'Date'],
-      ];
-
-      for (var doc in snapshot.docs) {
-        final data = doc.data();
-        final timestamp = data['timestamp'] != null
-            ? (data['timestamp'] as Timestamp).toDate()
-            : null;
-        rows.add([
-          data['productName'] ?? '',
-          '${data['quantity'] ?? ''}',
-          data['requestedBy'] ?? '',
-          data['status'] ?? '',
-          timestamp != null ? timestamp.toString() : '',
-        ]);
-      }
-
-      final csvContent = const ListToCsvConverter().convert(rows);
-
-      if (kIsWeb) {
-        downloadCSV(rows, 'admin_report.csv');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('CSV download started')),
-        );
-      } else {
-        final status = await Permission.storage.request();
-        if (!status.isGranted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Storage permission denied')),
-          );
-          return;
-        }
-
-        final directory = await getTemporaryDirectory();
-        final filePath = '${directory.path}/admin_report.csv';
-        final file = File(filePath);
-        await file.writeAsString(csvContent);
-
-        await Share.shareXFiles(
-          [XFile(filePath)],
-          text: 'Admin Report CSV attached',
-        );
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sharing CSV file...')),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to export report: $e')),
-      );
-    }
   }
 
   Widget buildBarChart(Map<String, int> data, String title) {
@@ -207,7 +137,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   Widget buildPieChart(Map<String, int> data, String title) {
-    final total = data.values.fold(0, (a, b) => a + b);
     final sections = data.entries.map((entry) {
       return PieChartSectionData(
         title: '${entry.key} (${entry.value})',
@@ -254,16 +183,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 ),
               ),
               const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () => pickDateAndExportLogs(context),
-                    icon: const Icon(Icons.download),
-                    label: const Text('Export Report'),
-                  ),
-                ],
-              ),
               if (inventorySummary.isNotEmpty) buildBarChart(inventorySummary, 'Inventory Quantities'),
               if (userRoles.isNotEmpty) buildPieChart(userRoles, 'User Role Distribution'),
               if (requestStats.isNotEmpty) buildBarChart(requestStats, 'Request Status Summary'),
@@ -282,6 +201,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
         return const UserRegistrationPage();
       case 'Notifications':
         return const NotificationsPage();
+      case 'Reports':
+        return  ReportPage();
       default:
         return const Center(child: Text("Page not found"));
     }
@@ -312,7 +233,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     child: _getPage(_selectedItem),
                   ),
                 ),
-                const AppFooter(), // Footer is placed correctly here
+                const AppFooter(),
               ],
             ),
           ),
