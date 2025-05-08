@@ -1,9 +1,9 @@
+// ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
-import 'package:csv/csv.dart';
+import 'dart:typed_data';
 
-void downloadCSVImpl(List<List<String>> rows, String filename) {
-  final csv = const ListToCsvConverter().convert(rows);
-  final blob = html.Blob([csv]);
+Future<void> downloadReportImpl(Uint8List bytes, String filename) async {
+  final blob = html.Blob([bytes]);
   final url = html.Url.createObjectUrlFromBlob(blob);
   final anchor = html.AnchorElement(href: url)
     ..setAttribute('download', filename)
