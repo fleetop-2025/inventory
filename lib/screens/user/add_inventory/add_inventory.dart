@@ -37,8 +37,6 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
         _quantityController.text.trim().isNotEmpty &&
         uid != null &&
         (_isWorking ^ _isFaulty)) {
-      // Only one checkbox must be selected
-
       final quantity = int.tryParse(_quantityController.text.trim());
 
       if (quantity == null || quantity <= 0) {
@@ -91,69 +89,77 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return _productList.isEmpty
-        ? const Center(child: CircularProgressIndicator())
-        : Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            const Text(
-              "Request New Product Addition",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return Scaffold(
+      appBar: AppBar(title: const Text("Add Inventory")),
+      body: _productList.isEmpty
+          ? const Center(child: CircularProgressIndicator())
+          : Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 500),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  "Request New Product Addition",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                DropdownButtonFormField<String>(
+                  value: _selectedProductId,
+                  items: _productList.map((product) {
+                    return DropdownMenuItem<String>(
+                      value: product['productId'],
+                      child: Text(product['productName'] ?? 'Unknown'),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedProductId = value;
+                      _selectedProductData = _productList.firstWhere(
+                            (product) => product['productId'] == value,
+                      );
+                    });
+                  },
+                  decoration: const InputDecoration(labelText: "Select Product"),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _quantityController,
+                  decoration: const InputDecoration(labelText: "Quantity"),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 10),
+                CheckboxListTile(
+                  title: const Text("Working"),
+                  value: _isWorking,
+                  onChanged: (value) {
+                    setState(() {
+                      _isWorking = value!;
+                      if (_isWorking) _isFaulty = false;
+                    });
+                  },
+                ),
+                CheckboxListTile(
+                  title: const Text("Faulty"),
+                  value: _isFaulty,
+                  onChanged: (value) {
+                    setState(() {
+                      _isFaulty = value!;
+                      if (_isFaulty) _isWorking = false;
+                    });
+                  },
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _submitRequest,
+                  child: const Text("Submit Request"),
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-            DropdownButtonFormField<String>(
-              value: _selectedProductId,
-              items: _productList.map((product) {
-                return DropdownMenuItem<String>(
-                  value: product['productId'],
-                  child: Text(product['productName'] ?? 'Unknown'),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedProductId = value;
-                  _selectedProductData = _productList.firstWhere(
-                        (product) => product['productId'] == value,
-                  );
-                });
-              },
-              decoration: const InputDecoration(labelText: "Select Product"),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _quantityController,
-              decoration: const InputDecoration(labelText: "Quantity"),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 10),
-            CheckboxListTile(
-              title: const Text("Working"),
-              value: _isWorking,
-              onChanged: (value) {
-                setState(() {
-                  _isWorking = value!;
-                  if (_isWorking) _isFaulty = false;
-                });
-              },
-            ),
-            CheckboxListTile(
-              title: const Text("Faulty"),
-              value: _isFaulty,
-              onChanged: (value) {
-                setState(() {
-                  _isFaulty = value!;
-                  if (_isFaulty) _isWorking = false;
-                });
-              },
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _submitRequest,
-              child: const Text("Submit Request"),
-            ),
-          ],
+          ),
         ),
       ),
     );

@@ -12,16 +12,19 @@ class ApprovalPage extends StatefulWidget {
 class _ApprovalPageState extends State<ApprovalPage> {
   final Map<String, String> _userEmailMap = {};
   bool _isLoading = true;
+  List<Map<String, dynamic>> _lowStockItems = [];
 
   @override
   void initState() {
     super.initState();
     _fetchUserEmails();
+    _fetchLowStockItems();
   }
 
   Future<void> _fetchUserEmails() async {
     try {
-      final snapshot = await FirebaseFirestore.instance.collection('users').get();
+      final snapshot = await FirebaseFirestore.instance.collection('users')
+          .get();
       final Map<String, String> tempMap = {};
       for (var doc in snapshot.docs) {
         tempMap[doc.id] = doc.data()['email'] ?? 'No Email';
@@ -40,11 +43,36 @@ class _ApprovalPageState extends State<ApprovalPage> {
     }
   }
 
-  Future<void> rejectRequest(String docId, String collection, String userId) async {
+  Future<void> _fetchLowStockItems() async {
     try {
-      await FirebaseFirestore.instance.collection(collection).doc(docId).update({
-        'status': 'rejected',
+      final snapshot = await FirebaseFirestore.instance
+          .collection('inventory')
+          .where('quantity', isLessThanOrEqualTo: 5)
+          .get();
+
+      final List<Map<String, dynamic>> lowStock = snapshot.docs.map((doc) {
+        final data = doc.data();
+        return {
+          'productName': data['productName'] ?? 'Unknown',
+          'quantity': data['quantity'] ?? 0,
+        };
+      }).toList();
+
+      setState(() {
+        _lowStockItems = lowStock;
       });
+    } catch (e) {
+      print('Error fetching low stock items: $e');
+    }
+  }
+
+  Future<void> rejectRequest(String docId, String collection,
+      String userId) async {
+    try {
+      await FirebaseFirestore.instance.collection(collection).doc(docId).update(
+          {
+            'status': 'rejected',
+          });
 
       await sendNotification(
         "Request Rejected",
@@ -77,7 +105,8 @@ class _ApprovalPageState extends State<ApprovalPage> {
     }
   }
 
-  Future<void> approveRequest(String docId, String collection, String userId, Map<String, dynamic> data) async {
+  Future<void> approveRequest(String docId, String collection, String userId,
+      Map<String, dynamic> data) async {
     final firestore = FirebaseFirestore.instance;
 
     try {
@@ -223,47 +252,61 @@ class _ApprovalPageState extends State<ApprovalPage> {
         }
 
         return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 30),
             Row(
               children: [
                 const Expanded(
-                  child: Divider(thickness: 2, color: Colors.blueGrey, endIndent: 8),
+                  child: Divider(
+                      thickness: 2, color: Colors.blueGrey, endIndent: 8),
                 ),
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blueGrey),
+                  style: const TextStyle(fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blueGrey),
                 ),
                 const Expanded(
-                  child: Divider(thickness: 2, color: Colors.blueGrey, indent: 8),
+                  child: Divider(
+                      thickness: 2, color: Colors.blueGrey, indent: 8),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             ...docs.map((doc) {
               final data = doc.data() as Map<String, dynamic>;
-              final requesterEmail = _userEmailMap[data['requestedBy']] ?? 'Unknown';
+              final requesterEmail = _userEmailMap[data['requestedBy']] ??
+                  'Unknown';
+              final quantity = data['quantity'] ?? 'N/A';
 
-              return Card(
-                margin: const EdgeInsets.symmetric(vertical: 6),
-                child: ListTile(
-                  title: Text(data['productName'] ?? 'Unknown Product'),
-                  subtitle: Flexible(
-                    child: Text('Requested by: $requesterEmail', overflow: TextOverflow.ellipsis),
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.check, color: Colors.green),
-                        onPressed: () => approveRequest(doc.id, collectionName, data['requestedBy'], data),
+              return Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: Card(
+                    margin: const EdgeInsets.symmetric(
+                        vertical: 8, horizontal: 16),
+                    child: ListTile(
+                      title: Text(data['productName'] ?? 'Unknown Product'),
+                      subtitle: Text(
+                          'Requested by: $requesterEmail\nQuantity: $quantity'),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.check, color: Colors.green),
+                            onPressed: () => approveRequest(
+                                doc.id, collectionName, data['requestedBy'],
+                                data),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, color: Colors.red),
+                            onPressed: () => rejectRequest(
+                                doc.id, collectionName, data['requestedBy']),
+                          ),
+                        ],
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.close, color: Colors.red),
-                        onPressed: () => rejectRequest(doc.id, collectionName, data['requestedBy']),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               );
@@ -280,15 +323,51 @@ class _ApprovalPageState extends State<ApprovalPage> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: ListView(
-        children: [
-          buildRequestList('TemporaryInventoryAdd', 'Inventory Addition Requests'),
-          buildRequestList('TemporaryInstallation', 'Installation Requests'),
-          buildRequestList('TemporaryInTransitOut', 'In-Transit Product Confirmations'),
-          buildRequestList('InventoryInTransitOut', 'In-Transit Inventory Additions')
-        ],
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 800),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: ListView(
+            children: [
+              // Low stock alert at the top
+              if (_lowStockItems.isNotEmpty)
+                Card(
+                  color: Colors.red.shade100,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "⚠️ Low Stock Alerts",
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight
+                              .bold, color: Colors.red),
+                        ),
+                        const SizedBox(height: 10),
+                        ..._lowStockItems.map((item) =>
+                            Text(
+                              "• ${item['productName']} - Only ${item['quantity']} left. Please order more.",
+                              style: const TextStyle(fontSize: 16),
+                            )),
+                      ],
+                    ),
+                  ),
+                ),
+
+              // Request sections
+              buildRequestList(
+                  'TemporaryInventoryAdd', 'Inventory Addition Requests'),
+              buildRequestList(
+                  'TemporaryInstallation', 'Installation Requests'),
+              buildRequestList(
+                  'TemporaryInTransitOut', 'In-Transit Product Confirmations'),
+              buildRequestList(
+                  'InventoryInTransitOut', 'In-Transit Inventory Additions'),
+            ],
+          ),
+        ),
       ),
     );
   }

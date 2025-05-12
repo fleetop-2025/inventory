@@ -12,6 +12,7 @@ import '../user_registration.dart';
 import 'package:inventory/widgets/custom_appbar.dart';
 import '../../../constants/version.dart';
 import '../report_page.dart';
+import '../category_management_page.dart';
 
 const List<String> availableCollections = [
   'TemporaryInventoryAdd',
@@ -42,6 +43,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     'Users',
     'Register User',
     'Notifications',
+    'Category Management',
     'Reports',
   ];
 
@@ -88,6 +90,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   Widget buildBarChart(Map<String, int> data, String title) {
+    if (data.isEmpty) {
+      return const SizedBox(); // or display a "No data" message
+    }
+
     final items = data.entries.toList();
     return Card(
       margin: const EdgeInsets.all(8),
@@ -107,7 +113,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         showTitles: true,
                         getTitlesWidget: (value, meta) {
                           if (value.toInt() >= items.length) return const Text('');
-                          return Text(items[value.toInt()].key, style: const TextStyle(fontSize: 10));
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Transform.rotate(
+                              angle: -0.5,
+                              child: Text(
+                                items[value.toInt()].key,
+                                style: const TextStyle(fontSize: 10),
+                              ),
+                            ),
+                          );
                         },
                       ),
                     ),
@@ -135,11 +150,18 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   Widget buildPieChart(Map<String, int> data, String title) {
+    if (data.isEmpty) {
+      return const SizedBox(); // or display a "No data" message
+    }
+
+    final colors = [Colors.red, Colors.green, Colors.blue, Colors.orange, Colors.purple];
+    int index = 0;
+
     final sections = data.entries.map((entry) {
       return PieChartSectionData(
         title: '${entry.key} (${entry.value})',
         value: entry.value.toDouble(),
-        color: entry.key == 'admin' ? Colors.red : Colors.green,
+        color: colors[index++ % colors.length],
         radius: 60,
         titleStyle: const TextStyle(fontSize: 12),
       );
@@ -162,6 +184,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       ),
     );
   }
+
 
   Widget _getPage(String page) {
     switch (page) {
@@ -199,6 +222,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
         return const UserRegistrationPage();
       case 'Notifications':
         return const NotificationsPage();
+      case 'Category Management':
+        return const CategoryManagementPage();
       case 'Reports':
         return ReportPage();
       default:

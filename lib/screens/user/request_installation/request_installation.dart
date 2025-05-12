@@ -24,7 +24,6 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
   final TextEditingController _installedByController = TextEditingController();
   final TextEditingController _referredByController = TextEditingController();
   String? _paymentStatus;
-
   bool _keywordStatus = false;
 
   Future<void> _fetchInventoryItems() async {
@@ -67,10 +66,9 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
 
     if (selectedItem.isNotEmpty &&
         location.isNotEmpty &&
-        phone.isNotEmpty &&
-        quantity != null &&
-        quantity > 0 &&
-        imei.isNotEmpty &&
+        phone.isNotEmpty && phone.length >= 10 &&
+        quantity != null && quantity > 0 &&
+        imei.isNotEmpty && imei.length >= 14 &&
         sim.isNotEmpty &&
         vehicle.isNotEmpty &&
         company.isNotEmpty &&
@@ -79,6 +77,7 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
         referredBy.isNotEmpty &&
         paymentStatus != null &&
         uid != null) {
+
       await FirebaseFirestore.instance.collection('TemporaryInstallation').add({
         'productName': selectedItem['productName'],
         'productId': selectedItem['productId'],
@@ -129,113 +128,120 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
   Widget build(BuildContext context) {
     return _inventoryItems.isEmpty
         ? const Center(child: CircularProgressIndicator())
-        : Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text("Request Installation", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 20),
-            DropdownButtonFormField<String>(
-              value: _selectedProductId,
-              items: _inventoryItems.map((item) {
-                return DropdownMenuItem<String>(
-                  value: item['productId'],
-                  child: Text(item['productName'] ?? 'Unknown'),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedProductId = value;
-                });
-              },
-              decoration: const InputDecoration(labelText: "Select Product from Inventory"),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _quantityController,
-              decoration: const InputDecoration(labelText: "Quantity to Install"),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _locationController,
-              decoration: const InputDecoration(labelText: "Installation Location"),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _phoneController,
-              decoration: const InputDecoration(labelText: "Phone Number"),
-              keyboardType: TextInputType.phone,
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _imeiController,
-              decoration: const InputDecoration(labelText: "IMEI Number"),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _simController,
-              decoration: const InputDecoration(labelText: "SIM Number"),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _vehicleController,
-              decoration: const InputDecoration(labelText: "Vehicle Number"),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _companyController,
-              decoration: const InputDecoration(labelText: "Company Name"),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _ownerIdController,
-              decoration: const InputDecoration(labelText: "Owner ID"),
-            ),
-            const SizedBox(height: 10),
-            CheckboxListTile(
-              value: _keywordStatus,
-              onChanged: (val) {
-                setState(() {
-                  _keywordStatus = val ?? false;
-                });
-              },
-              title: const Text("Keyword Status"),
-              controlAffinity: ListTileControlAffinity.leading,
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _installedByController,
-              decoration: const InputDecoration(labelText: "Installed By"),
-            ),
-            const SizedBox(height: 10),
-            DropdownButtonFormField<String>(
-              value: _paymentStatus,
-              items: const [
-                DropdownMenuItem(value: 'paid', child: Text("Paid")),
-                DropdownMenuItem(value: 'unpaid', child: Text("Unpaid")),
+        : Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 600),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("Request Installation", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 20),
+                DropdownButtonFormField<String>(
+                  value: _selectedProductId,
+                  items: _inventoryItems.map((item) {
+                    return DropdownMenuItem<String>(
+                      value: item['productId'],
+                      child: Text(item['productName'] ?? 'Unknown'),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedProductId = value;
+                    });
+                  },
+                  decoration: const InputDecoration(labelText: "Select Product from Inventory"),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _quantityController,
+                  decoration: const InputDecoration(labelText: "Quantity to Install"),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _locationController,
+                  decoration: const InputDecoration(labelText: "Installation Location"),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _phoneController,
+                  decoration: const InputDecoration(labelText: "Phone Number"),
+                  keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _imeiController,
+                  decoration: const InputDecoration(labelText: "IMEI Number"),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _simController,
+                  decoration: const InputDecoration(labelText: "SIM Number"),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _vehicleController,
+                  decoration: const InputDecoration(labelText: "Vehicle Number"),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _companyController,
+                  decoration: const InputDecoration(labelText: "Company Name"),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _ownerIdController,
+                  decoration: const InputDecoration(labelText: "Owner ID"),
+                ),
+                const SizedBox(height: 10),
+                CheckboxListTile(
+                  value: _keywordStatus,
+                  onChanged: (val) {
+                    setState(() {
+                      _keywordStatus = val ?? false;
+                    });
+                  },
+                  title: const Text("Keyword Status"),
+                  controlAffinity: ListTileControlAffinity.leading,
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _installedByController,
+                  decoration: const InputDecoration(labelText: "Installed By"),
+                ),
+                const SizedBox(height: 10),
+                DropdownButtonFormField<String>(
+                  value: _paymentStatus,
+                  items: const [
+                    DropdownMenuItem(value: 'paid', child: Text("Paid")),
+                    DropdownMenuItem(value: 'unpaid', child: Text("Unpaid")),
+                  ],
+                  onChanged: (val) {
+                    setState(() {
+                      _paymentStatus = val;
+                    });
+                  },
+                  decoration: const InputDecoration(labelText: "Payment Status"),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _referredByController,
+                  decoration: const InputDecoration(labelText: "Referred By"),
+                ),
+                const SizedBox(height: 20),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: _submitInstallation,
+                    child: const Text("Send Request"),
+                  ),
+                ),
               ],
-              onChanged: (val) {
-                setState(() {
-                  _paymentStatus = val;
-                });
-              },
-              decoration: const InputDecoration(labelText: "Payment Status"),
             ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _referredByController,
-              decoration: const InputDecoration(labelText: "Referred By"),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _submitInstallation,
-              child: const Text("Send Request"),
-            ),
-          ],
+          ),
         ),
       ),
     );
