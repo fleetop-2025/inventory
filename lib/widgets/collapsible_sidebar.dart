@@ -101,6 +101,12 @@ class CollapsibleSidebar extends StatelessWidget {
         return Icons.playlist_add;
       case 'Request Installation':
         return Icons.build;
+      case 'Logs':
+        return Icons.receipt_long;
+      case 'Reports':
+        return Icons.insert_chart_outlined;
+      case 'Category Management':
+        return Icons.category;
       default:
         return Icons.help;
     }
