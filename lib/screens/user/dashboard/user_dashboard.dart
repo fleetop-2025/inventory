@@ -193,7 +193,6 @@ class _UserDashboardState extends State<UserDashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        onLogout: widget.onLogout,
         title: 'User Dashboard',
         centerWidget: Image.asset(
           'assets/fleetop-removebg-preview.png',
