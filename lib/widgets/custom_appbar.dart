@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../screens/login_screen.dart'; // Adjust path if needed
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final VoidCallback onLogout;
   final String? title;
   final Widget? centerWidget;
 
@@ -9,15 +10,26 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     Key? key,
     this.title,
     this.centerWidget,
-    required this.onLogout,
   }) : super(key: key);
+
+  void _handleLogout(BuildContext context) {
+    // Navigate to login screen immediately
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
+    );
+
+    // Then sign out
+    FirebaseAuth.instance.signOut();
+  }
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
       toolbarHeight: kToolbarHeight,
-      backgroundColor: Color(0xFF222831),
+      backgroundColor: const Color(0xFF222831),
       title: Row(
         children: [
           // Title aligned to the left
@@ -36,13 +48,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           // Logout button
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: onLogout,
+            tooltip: 'Logout',
+            onPressed: () => _handleLogout(context),
           ),
         ],
       ),
     );
   }
-
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
