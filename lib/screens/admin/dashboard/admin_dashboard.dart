@@ -13,6 +13,7 @@ import 'package:inventory/widgets/custom_appbar.dart';
 import '../../../constants/version.dart';
 import '../report_page.dart';
 import '../category_management_page.dart';
+import '../logs_page.dart';
 
 const List<String> availableCollections = [
   'TemporaryInventoryAdd',
@@ -45,6 +46,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     'Notifications',
     'Category Management',
     'Reports',
+    'Logs',
   ];
 
   Map<String, int> inventorySummary = {};
@@ -226,6 +228,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
         return const CategoryManagementPage();
       case 'Reports':
         return ReportPage();
+      case 'Logs':
+        return const LogsPage();
       default:
         return const Center(child: Text("Page not found"));
     }
@@ -236,7 +240,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Admin Dashboard',
-        onLogout: widget.onLogout,
         centerWidget: Image.asset(
           'assets/fleetop-removebg-preview.png',
           height: 40,
