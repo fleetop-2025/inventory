@@ -82,9 +82,9 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
 
           final role = snapshot.data;
 
-          if (role == 'admin') {
+          if (role == 'Admin') {
             return AdminDashboard(onLogout: () => _handleLogout(context));
-          } else if (role == 'user') {
+          } else if (role == 'User') {
             return UserDashboard(onLogout: () => _handleLogout(context));
           } else {
             return Scaffold(
