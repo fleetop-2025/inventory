@@ -93,8 +93,12 @@ class CollapsibleSidebar extends StatelessWidget {
         return Icons.group;
       case 'Register User':
         return Icons.person_add;
+      case 'Installations':
+        return Icons.settings_input_component;
       case 'Notifications':
         return Icons.notifications;
+      case 'Installation Type':
+        return Icons.extension;
       case 'Inventory':
         return Icons.inventory_2;
       case 'Add Inventory':
