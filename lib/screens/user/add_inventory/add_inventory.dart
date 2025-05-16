@@ -10,22 +10,42 @@ class AddInventoryPage extends StatefulWidget {
 }
 
 class _AddInventoryPageState extends State<AddInventoryPage> {
+  String? _selectedCategory;
   String? _selectedProductId;
   Map<String, dynamic>? _selectedProductData;
+
   final TextEditingController _quantityController = TextEditingController();
+
+  List<String> _categories = [];
   List<Map<String, dynamic>> _productList = [];
 
   bool _isWorking = false;
   bool _isFaulty = false;
 
-  Future<void> _fetchProducts() async {
-    final snapshot = await FirebaseFirestore.instance.collection('products').get();
+  /// Fetch category names from 'categories' collection
+  Future<void> _fetchCategories() async {
+    final snapshot = await FirebaseFirestore.instance.collection('categories').get();
+    setState(() {
+      _categories = snapshot.docs.map((doc) => doc['name'].toString()).toList();
+    });
+  }
+
+  /// Fetch products matching selected category
+  Future<void> _fetchProductsByCategory(String categoryName) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('products')
+        .where('category', isEqualTo: categoryName)
+        .get();
+
     setState(() {
       _productList = snapshot.docs.map((doc) {
         final data = doc.data();
         data['productId'] = doc.id;
         return data;
       }).toList();
+
+      _selectedProductId = null;
+      _selectedProductData = null;
     });
   }
 
@@ -68,11 +88,13 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
       );
 
       setState(() {
+        _selectedCategory = null;
         _selectedProductId = null;
         _selectedProductData = null;
         _quantityController.clear();
         _isWorking = false;
         _isFaulty = false;
+        _productList = [];
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -84,14 +106,14 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
   @override
   void initState() {
     super.initState();
-    _fetchProducts();
+    _fetchCategories();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Add Inventory")),
-      body: _productList.isEmpty
+      body: _categories.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : Center(
         child: SingleChildScrollView(
@@ -107,6 +129,29 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
+
+                // Category Dropdown
+                DropdownButtonFormField<String>(
+                  value: _selectedCategory,
+                  items: _categories.map((category) {
+                    return DropdownMenuItem<String>(
+                      value: category,
+                      child: Text(category),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        _selectedCategory = value;
+                      });
+                      _fetchProductsByCategory(value);
+                    }
+                  },
+                  decoration: const InputDecoration(labelText: "Select Category"),
+                ),
+                const SizedBox(height: 10),
+
+                // Product Dropdown (filtered by category)
                 DropdownButtonFormField<String>(
                   value: _selectedProductId,
                   items: _productList.map((product) {
@@ -126,12 +171,14 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                   decoration: const InputDecoration(labelText: "Select Product"),
                 ),
                 const SizedBox(height: 10),
+
                 TextField(
                   controller: _quantityController,
                   decoration: const InputDecoration(labelText: "Quantity"),
                   keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: 10),
+
                 CheckboxListTile(
                   title: const Text("Working"),
                   value: _isWorking,
@@ -153,6 +200,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                   },
                 ),
                 const SizedBox(height: 20),
+
                 ElevatedButton(
                   onPressed: _submitRequest,
                   child: const Text("Submit Request"),
