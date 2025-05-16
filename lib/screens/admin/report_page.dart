@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import '../../helpers/report_downloader.dart'; // Adjust path as needed
+import '../../helpers/report_downloader.dart'; // Adjust if needed
 
 class ReportPage extends StatefulWidget {
   @override
@@ -40,6 +40,14 @@ class _ReportPageState extends State<ReportPage> {
   }
 
   Future<void> downloadReport() async {
+    if (startDate == null || endDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Please select a date range first.'),
+        backgroundColor: Colors.red,
+      ));
+      return;
+    }
+
     try {
       final snapshot = await FirebaseFirestore.instance
           .collection(selectedCollection)
@@ -48,41 +56,45 @@ class _ReportPageState extends State<ReportPage> {
           .get();
 
       final userSnapshot = await FirebaseFirestore.instance.collection('users').get();
-      final userMap = {
-        for (var doc in userSnapshot.docs) doc.id: doc['email'] ?? 'N/A'
+      final Map<String, String> userMap = {
+        for (var doc in userSnapshot.docs)
+          doc.id: (doc.data()['email'] ?? 'N/A').toString()
       };
 
-      final allDocs = snapshot.docs.map((doc) => doc.data()).toList();
-
+      final allDocs = snapshot.docs;
       final Set<String> allKeys = {};
-      for (var data in allDocs) {
+
+      for (var doc in allDocs) {
+        final data = doc.data();
         allKeys.addAll(data.keys);
       }
 
-      allKeys.add('timestamp');
-      allKeys.add('userEmail');
+      // Ensure consistent key order
+      List<String> headers = allKeys.toList()..sort();
+      if (!headers.contains('timestamp')) headers.insert(0, 'timestamp');
+      if (!headers.contains('userEmail')) headers.add('userEmail');
 
-      final headers = allKeys.toList();
       List<List<dynamic>> csvData = [headers];
 
-      for (var data in allDocs) {
-        Map<String, dynamic> rowMap = {};
+      for (var doc in allDocs) {
+        final data = doc.data();
+        final Map<String, dynamic> row = {};
 
         for (var key in headers) {
-          var value = data[key];
-
-          if (key == 'timestamp' && value is Timestamp) {
-            rowMap[key] = DateFormat('yyyy-MM-dd HH:mm:ss').format(value.toDate());
+          if (key == 'timestamp') {
+            final ts = data['timestamp'];
+            row[key] = ts is Timestamp
+                ? DateFormat('yyyy-MM-dd HH:mm:ss').format(ts.toDate())
+                : '';
           } else if (key == 'userEmail') {
-            String? userId = data['requestedBy']?.toString();
-            rowMap[key] = userId != null ? (userMap[userId] ?? 'Unknown') : 'Unknown';
+            final userId = data['requestedBy']?.toString() ?? data['userId']?.toString();
+            row[key] = userId != null ? (userMap[userId] ?? 'Unknown') : 'Unknown';
           } else {
-            rowMap[key] = value != null ? value.toString() : '';
+            row[key] = data[key]?.toString() ?? '';
           }
         }
 
-        List<dynamic> row = headers.map((key) => rowMap[key] ?? '').toList();
-        csvData.add(row);
+        csvData.add(headers.map((key) => row[key] ?? '').toList());
       }
 
       final csv = const ListToCsvConverter().convert(csvData);
@@ -91,10 +103,12 @@ class _ReportPageState extends State<ReportPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Report downloaded successfully.'),
+        backgroundColor: Colors.green,
       ));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Error: $e'),
+        content: Text('Error: ${e.toString()}'),
+        backgroundColor: Colors.red,
       ));
     }
   }
@@ -106,6 +120,7 @@ class _ReportPageState extends State<ReportPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             DropdownButton<String>(
               value: selectedCollection,
