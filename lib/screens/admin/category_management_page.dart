@@ -87,7 +87,7 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
                           return ListTile(
                             title: Text(doc['name']),
                             trailing: IconButton(
-                              icon: const Icon(Icons.delete),
+                              icon: const Icon(Icons.delete, color: Colors.red),
                               onPressed: () => _deleteCategory(doc.id),
                             ),
                           );
