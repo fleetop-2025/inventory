@@ -14,6 +14,8 @@ import '../../../constants/version.dart';
 import '../report_page.dart';
 import '../category_management_page.dart';
 import '../logs_page.dart';
+import '../InstallationTypePage.dart';
+import '../InstallationsPage.dart';
 
 const List<String> availableCollections = [
   'TemporaryInventoryAdd',
@@ -39,11 +41,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
   final List<String> _menuItems = [
     'Dashboard',
     'Inventory',
+    'Installations',
     'Register Product',
     'Approvals',
     'Users',
     'Register User',
     'Notifications',
+    'Installation Type',
     'Category Management',
     'Reports',
     'Logs',
@@ -214,6 +218,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
         );
       case 'Inventory':
         return const ProductViewPage();
+      case 'Installations':
+        return  InstallationsPage();
       case 'Approvals':
         return const ApprovalPage();
       case 'Users':
@@ -224,6 +230,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
         return const UserRegistrationPage();
       case 'Notifications':
         return const NotificationsPage();
+      case 'Installation Type':
+        return const InstallationTypePage();
       case 'Category Management':
         return const CategoryManagementPage();
       case 'Reports':
