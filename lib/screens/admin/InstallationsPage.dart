@@ -41,7 +41,7 @@ class _InstallationsPageState extends State<InstallationsPage> {
         children: [
           DropdownButton<String>(
             value: _selectedStatus,
-            items: ['All', 'Pending', 'Approved', 'Rejected']
+            items: ['All', 'pending', 'approved', 'rejected']
                 .map((status) => DropdownMenuItem(value: status, child: Text(status)))
                 .toList(),
             onChanged: (val) => setState(() => _selectedStatus = val!),
