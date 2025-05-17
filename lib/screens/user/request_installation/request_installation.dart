@@ -59,6 +59,28 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
     return List<String>.from(_selectedInstallationType!['categories']);
   }
 
+  void _clearFormFields() {
+    _selectedInstallationType = null;
+    _locationController.clear();
+    _phoneController.clear();
+    _imeiController.clear();
+    _sensorSerialController.clear();
+    _relaySerialController.clear();
+    _panicQuantityController.clear();
+    _simController.clear();
+    _vehicleController.clear();
+    _companyController.clear();
+    _userIdController.clear();
+    _installedByController.clear();
+    _referredByController.clear();
+    _invoiceNumberController.clear();
+    _tariffPlan = null;
+    _keywordStatus = false;
+    _customerExcelStatus = null;
+    _calibrationFileStatus = null;
+    _paymentStatus = null;
+  }
+
   void _submitInstallation() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -98,9 +120,8 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
     );
 
     setState(() {
-      _selectedInstallationType = null;
       _formKey.currentState!.reset();
-      _keywordStatus = false;
+      _clearFormFields();
     });
   }
 
@@ -137,7 +158,7 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
               const Divider(),
               _buildTextField(_locationController, "Installation Location", validator: _required),
               _buildTextField(_phoneController, "Phone Number", keyboardType: TextInputType.phone, validator: _phoneValidator),
-              _buildTextField(_simController, "SIM Number", validator: _required),
+              _buildTextField(_simController, "SIM Number", keyboardType: TextInputType.phone, validator: _simValidator),
               _buildTextField(_vehicleController, "Vehicle Number", validator: _required),
               _buildTextField(_companyController, "Company Name", validator: _required),
               _buildTextField(_userIdController, "User ID", validator: _required),
@@ -202,18 +223,18 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
     final fields = <Widget>[];
 
     if (categories.contains('GPS')) {
-      fields.add(_buildTextField(_imeiController, "IMEI Number", validator: (val) {
-        if (val == null || val.length < 14) return "Enter valid IMEI";
+      fields.add(_buildTextField(_imeiController, "IMEI Number",keyboardType: TextInputType.phone, validator: (val) {
+        if (val == null || val.length < 15) return "Enter valid IMEI";
         return null;
       }));
     }
 
     if (categories.contains('Sensors')) {
-      fields.add(_buildTextField(_sensorSerialController, "Sensor Serial Number", validator: _required));
+      fields.add(_buildTextField(_sensorSerialController, "Sensor Serial Number",keyboardType: TextInputType.phone, validator: _required));
     }
 
     if (categories.contains('Relays')) {
-      fields.add(_buildTextField(_relaySerialController, "Relay Serial Number", validator: _required));
+      fields.add(_buildTextField(_relaySerialController, "Relay Serial Number",keyboardType: TextInputType.phone, validator: _required));
     }
 
     if (categories.contains('Panic Buttons')) {
@@ -236,6 +257,7 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
+        textCapitalization: TextCapitalization.characters,
         decoration: InputDecoration(labelText: label),
         validator: validator,
       ),
@@ -246,6 +268,10 @@ class _RequestInstallationPageState extends State<RequestInstallationPage> {
 
   String? _phoneValidator(String? val) {
     if (val == null || val.length < 10) return "Enter valid phone number";
+    return null;
+  }
+  String? _simValidator(String? val){
+    if(val == null || val.length < 13) return "Sim Number should be of 13 digits";
     return null;
   }
 }
