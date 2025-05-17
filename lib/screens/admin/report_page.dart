@@ -48,11 +48,19 @@ class _ReportPageState extends State<ReportPage> {
       return;
     }
 
+    // ✅ Make endDate inclusive by setting it to the end of the day
+    final DateTime adjustedEndDate = DateTime(
+      endDate!.year,
+      endDate!.month,
+      endDate!.day,
+      23, 59, 59, 999,
+    );
+
     try {
       final snapshot = await FirebaseFirestore.instance
           .collection(selectedCollection)
           .where('timestamp', isGreaterThanOrEqualTo: startDate)
-          .where('timestamp', isLessThanOrEqualTo: endDate)
+          .where('timestamp', isLessThanOrEqualTo: adjustedEndDate)
           .get();
 
       final userSnapshot = await FirebaseFirestore.instance.collection('users').get();
@@ -69,7 +77,6 @@ class _ReportPageState extends State<ReportPage> {
         allKeys.addAll(data.keys);
       }
 
-      // Ensure consistent key order
       List<String> headers = allKeys.toList()..sort();
       if (!headers.contains('timestamp')) headers.insert(0, 'timestamp');
       if (!headers.contains('userEmail')) headers.add('userEmail');
