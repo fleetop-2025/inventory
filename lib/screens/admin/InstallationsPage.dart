@@ -7,7 +7,6 @@ class InstallationsPage extends StatefulWidget {
 }
 
 class _InstallationsPageState extends State<InstallationsPage> {
-  String _selectedStatus = 'All';
   String _sortField = 'timestamp';
   bool _isAscending = false;
 
@@ -19,6 +18,7 @@ class _InstallationsPageState extends State<InstallationsPage> {
   String keywordStatusSearch = '';
   String calibrationStatusSearch = '';
   String customerExcelStatusSearch = '';
+  String statusSearch = '';
 
   @override
   Widget build(BuildContext context) {
@@ -39,14 +39,6 @@ class _InstallationsPageState extends State<InstallationsPage> {
       padding: const EdgeInsets.all(8.0),
       child: Row(
         children: [
-          DropdownButton<String>(
-            value: _selectedStatus,
-            items: ['All', 'pending', 'approved', 'rejected']
-                .map((status) => DropdownMenuItem(value: status, child: Text(status)))
-                .toList(),
-            onChanged: (val) => setState(() => _selectedStatus = val!),
-          ),
-          const SizedBox(width: 20),
           DropdownButton<String>(
             value: _sortField,
             items: ['timestamp', 'panic_quantity', 'requestedBy']
@@ -77,6 +69,7 @@ class _InstallationsPageState extends State<InstallationsPage> {
           _buildSearchBox("Keyword Status", (val) => setState(() => keywordStatusSearch = val)),
           _buildSearchBox("Calibration File Status", (val) => setState(() => calibrationStatusSearch = val)),
           _buildSearchBox("Customer Excel Status", (val) => setState(() => customerExcelStatusSearch = val)),
+          _buildSearchBox("Status", (val) => setState(() => statusSearch = val)), // new status search field
         ],
       ),
     );
@@ -98,15 +91,14 @@ class _InstallationsPageState extends State<InstallationsPage> {
 
   Widget _buildInstallationsList() {
     Query query = FirebaseFirestore.instance.collection('TemporaryInstallation');
-    if (_selectedStatus != 'All') {
-      query = query.where('status', isEqualTo: _selectedStatus.toLowerCase());
-    }
     query = query.orderBy(_sortField, descending: !_isAscending);
 
     return StreamBuilder<QuerySnapshot>(
       stream: query.snapshots(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        }
 
         final docs = snapshot.data!.docs;
 
@@ -118,7 +110,8 @@ class _InstallationsPageState extends State<InstallationsPage> {
               (data['tariff_plan'] ?? '').toString().toLowerCase().contains(tariffSearch.toLowerCase()) &&
               (data['keyword_status'] ?? '').toString().toLowerCase().contains(keywordStatusSearch.toLowerCase()) &&
               (data['calibration_file_status'] ?? '').toString().toLowerCase().contains(calibrationStatusSearch.toLowerCase()) &&
-              (data['customer_excel_status'] ?? '').toString().toLowerCase().contains(customerExcelStatusSearch.toLowerCase());
+              (data['customer_excel_status'] ?? '').toString().toLowerCase().contains(customerExcelStatusSearch.toLowerCase()) &&
+              (data['status'] ?? '').toString().toLowerCase().contains(statusSearch.toLowerCase());
         }).toList();
 
         return ListView.builder(
